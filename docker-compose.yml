@@ -1,0 +1,22 @@
+version: "3"
+services:
+    flask:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - 8080:5000
+        depends_on:
+            - mongo
+        environment:
+            - MONGO_URI=mongodb://mongo:27017/todo_db
+
+    mongo:
+        image: mongo
+        ports:
+            - 27017:27017
+        volumes:
+            - mongo_data:/data/db
+
+volumes:
+    mongo_data:

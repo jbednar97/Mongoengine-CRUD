@@ -1,0 +1,3 @@
+Flask==1.1.4
+Flask-MongoEngine
+MarkupSafe==1.1.1
