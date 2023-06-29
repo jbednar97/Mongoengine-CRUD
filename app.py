@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 from flask_mongoengine import MongoEngine
 import os
 
@@ -39,11 +39,41 @@ def create_todo():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/todos/<todo_id>', methods=['GET'])
+def get_todo(todo_id):
+    try:
+        todo = Todo.objects.get(id=todo_id)
+        return jsonify(todo)
+    except:
+        abort(
+            404, f'Todo with id: {todo_id} is not available in the database.')
+
+
 @app.route('/delete-todo/<todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
     todo = Todo.objects.get_or_404(id=todo_id)
     todo.delete()
     return f'Todo {todo.task} deleted successfully'
+
+
+@app.route('/edit-todo/<todo_id>', methods=['PATCH'])
+def edit_todo(todo_id):
+    todo = Todo.objects.get_or_404(id=todo_id)
+    task = request.form.get("task")
+    description = request.form.get("description")
+
+    # Validate task and description values
+    if task is None and description is None:
+        abort(400, 'No updates provided')
+
+    # Update task and description if values are not None
+    if task is not None:
+        todo.task = task
+    if description is not None:
+        todo.description = description
+
+    todo.save()
+    return f'Todo {todo.id} updated successfully'
 
 
 if __name__ == '__main__':
